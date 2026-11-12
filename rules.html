@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rules · Plex</title>
+<meta name="description" content="How to play Plex: surround the red stone, score points, eat your opponent.">
+<link rel="icon" href="assets/img/plex-icon.png">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="play/app.css">
+<style>body{overscroll-behavior:auto}</style>
+</head>
+<body>
+<header class="top"><a href="./"><img src="assets/img/plex-logo.svg" alt="Plex"></a><nav><a href="play/">Play</a><a href="./">Home</a></nav></header>
+<main class="doc">
+  <h1>How to Plex</h1>
+  <p class="lead">Each player starts with 12 stones, either yellow or blue. The red stone is in the centre of the game. Yellow places first.</p>
+
+  <section class="rule">
+    <p class="num">Your turn</p>
+    <h2>Place one stone</h2>
+    <p>Take a stone from your row, turn it any way you like and lay it against the pattern. It must lie free and touch what is already there with at least two corners. Stones on the table are never moved.</p>
+  </section>
+
+  <section class="rule">
+    <p class="num">Rule number one</p>
+    <h2>Surround the red stone to win</h2>
+    <p>Whoever can surround the red centre stone with their own colour wins the game, at once. Stones of your opponent may sit inside your ring.</p>
+    <figure class="fig"><svg id="fig-surround" role="img" aria-label="Yellow stones closed around the red stone"></svg><figcaption>Yellow has closed the ring. Yellow wins.</figcaption></figure>
+  </section>
+
+  <section class="rule">
+    <p class="num">Rule number two</p>
+    <h2>Winning by points</h2>
+    <p>To make points you need to make a hollow space, which you then fill with your own point stones. One triangle is one point, a diamond is two. The orange points belong to yellow, the violet points to blue. The bigger the hollow space, the more points you make.</p>
+    <figure class="fig"><svg id="fig-points" role="img" aria-label="A blue stone closes a diamond under the red stone"></svg><figcaption>Blue closes a diamond under the red stone and makes two points.</figcaption></figure>
+    <p>Watch out: point stones are common ground. Your opponent can use them to surround the red stone.</p>
+    <p>If all stones are placed and nobody has surrounded the red stone, the player with more points wins. Equal points is a draw. Surrounding the red stone always beats a win on points.</p>
+  </section>
+
+  <section class="rule">
+    <p class="num">Rule number three</p>
+    <h2>Eating your opponent</h2>
+    <p>If you can surround a stone of your opponent, you take it out of the game, change its colour to your own and add it to your row to use later.</p>
+    <p>The empty space that remains stays empty until the end of the game. It is common ground, like the point stones: it can help surround the red stone or more of your opponent's stones.</p>
+    <p>Be careful with your own points. You can landlock your own stones with them, and then your opponent takes those.</p>
+  </section>
+
+  <p style="margin-top:36px"><a class="btn solid" href="play/" style="width:auto">Play now</a></p>
+</main>
+
+<script src="play/engine.js"></script>
+<script>
+(function () {
+  const P = window.Plex, NS = 'http://www.w3.org/2000/svg';
+  const S3 = Math.sqrt(3) / 2, C = Math.cos(Math.PI / 6), S = Math.sin(Math.PI / 6);
+  const pos = (a, b) => { const x = a + b / 2, y = b * S3; return [x * C + y * S, x * S - y * C]; };
+  const pts = (vs) => vs.map((v) => pos(v[0], v[1]).map((n) => n.toFixed(3)).join(',')).join(' ');
+  function draw(id, g) {
+    const svg = document.getElementById(id);
+    let x0 = 9, x1 = -9, y0 = 9, y1 = -9;
+    const add = (name, verts, cls) => {
+      const e = document.createElementNS(NS, name);
+      e.setAttribute('points', pts(verts)); e.setAttribute('class', cls); svg.appendChild(e);
+      for (const v of verts) { const p = pos(v[0], v[1]); x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }
+    };
+    for (const [k, cell] of g.cells) {
+      if (cell.t === 'V') add('polygon', P.cellVerts(P.unkey(k)), 'void');
+      else if (cell.t[0] === 'p') add('polygon', P.cellVerts(P.unkey(k)), 'pt ' + cell.t);
+    }
+    add('polygon', P.stoneOutline(0, 0, 0), 'stone R');
+    for (const st of g.stones.values()) add('polygon', P.stoneOutline(st.a, st.b, st.r), 'stone ' + st.owner);
+    svg.setAttribute('viewBox', [x0 - 1, y0 - 1, x1 - x0 + 2, y1 - y0 + 2].join(' '));
+  }
+  // rule 2: one blue stone under the red notch
+  let g = P.newGame(); g.turn = 'B';
+  draw('fig-points', P.play(g, 1, -1, 3));
+  // rule 1: yellow keeps placing the stone closest to the centre until the ring closes
+  g = P.newGame();
+  const d = (m) => m.a * m.a + m.b * m.b + m.a * m.b;
+  for (let i = 0; i < 12 && !g.winner; i++) {
+    g.turn = 'Y';
+    const ms = P.legalMoves(g).sort((x, y) => d(x) - d(y));
+    g = P.play(g, ms[0].a, ms[0].b, ms[0].r);
+  }
+  draw('fig-surround', g);
+})();
+</script>
+</body>
+</html>

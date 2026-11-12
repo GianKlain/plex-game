@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Play Plex</title>
+<meta name="description" content="Practise Plex against the computer or a friend on the same device.">
+<meta name="theme-color" content="#e61200">
+<link rel="icon" href="../assets/img/plex-icon.png">
+<link rel="apple-touch-icon" href="../assets/img/plex-icon-256x256.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<main id="home" class="screen">
+  <img class="home-logo" src="../assets/img/Plex-Logo-RedOnWhite.svg" alt="Plex">
+  <p class="tag">Patterns of the Mind</p>
+
+  <section class="card">
+    <h2>VS Computer</h2>
+    <p class="sub">12 stones each. You are yellow and place first.</p>
+    <div class="chips" id="levels" role="radiogroup" aria-label="Level">
+      <button role="radio" data-level="easy" aria-checked="true">Easy</button>
+      <button role="radio" data-level="medium" aria-checked="false">Medium</button>
+      <button role="radio" data-level="hard" aria-checked="false">Hard</button>
+    </div>
+    <button class="btn primary" id="start-ai">Play</button>
+    <p class="record" id="record"></p>
+  </section>
+
+  <section class="card">
+    <h2>Two players</h2>
+    <p class="sub">Pass one device back and forth.</p>
+    <button class="btn" id="start-local">Play</button>
+  </section>
+
+  <section class="card muted">
+    <h2>VS Friend online</h2>
+    <p class="sub">Invite by link, play owners, win your copy. Coming next.</p>
+  </section>
+
+  <nav class="home-links">
+    <a href="../rules.html">Rules</a>
+    <a href="../">plex.swiss</a>
+  </nav>
+</main>
+
+<main id="game" class="screen" hidden>
+  <header class="bar" id="bar-top"></header>
+  <div class="board-wrap">
+    <svg id="board" xmlns="http://www.w3.org/2000/svg" aria-label="Plex board"></svg>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <button class="icon-btn" id="menu-btn" aria-label="Options">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg>
+    </button>
+  </div>
+  <p id="hint"></p>
+  <div class="controls">
+    <button class="btn" id="rotate-btn">Rotate</button>
+    <button class="btn primary" id="place-btn">End turn</button>
+  </div>
+  <footer class="bar" id="bar-bottom"></footer>
+</main>
+
+<dialog id="menu">
+  <h2>Options</h2>
+  <button class="btn" data-act="grid">Hide background grid</button>
+  <button class="btn" data-act="rematch">Resign and rematch</button>
+  <button class="btn" data-act="home">Abandon</button>
+  <button class="btn primary" data-act="close">Back to game</button>
+</dialog>
+
+<dialog id="over">
+  <h2 id="over-title"></h2>
+  <p id="over-sub"></p>
+  <p id="over-score"></p>
+  <p id="over-note"></p>
+  <button class="btn primary" data-act="rematch">Rematch</button>
+  <button class="btn" data-act="view">Look at the board</button>
+  <button class="btn" data-act="home">Back to home</button>
+</dialog>
+
+<script src="engine.js"></script>
+<script src="ai.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

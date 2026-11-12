@@ -1,0 +1,10 @@
+{
+  "name": "Plex — Patterns of the Mind",
+  "short_name": "Plex",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#e61200",
+  "icons": [{ "src": "../assets/img/plex-icon-256x256.png", "sizes": "256x256", "type": "image/png" }]
+}

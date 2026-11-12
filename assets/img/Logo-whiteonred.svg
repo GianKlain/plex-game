@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="350px" height="350px" viewBox="0 0 350 350" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <title>Artboard</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#EC2639" x="0" y="0" width="350" height="350"></rect>
+        <g id="Artboard-1" transform="translate(65.000000, 43.000000)" fill-rule="nonzero">
+            <polygon id="Path" fill="#000000" points="199.128205 119.68704 199.128205 119.9264 199.269231 119.68704"></polygon>
+            <rect id="Rectangle" fill="#FFFFFF" x="0.620512821" y="0.4928" width="31.6602564" height="119.73632"></rect>
+            <rect id="Rectangle" fill="#FFFFFF" x="118.694231" y="0.4928" width="31.6532051" height="119.73632"></rect>
+            <polygon id="Path" fill="#FFFFFF" points="191.576282 85.20512 171.325 120.22912 211.834615 120.22912"></polygon>
+            <polygon id="Path" fill="#FFFFFF" points="114.477564 144.1792 150.333333 144.1792 219.569872 263.90848 183.721154 263.90848"></polygon>
+            <polygon id="Path" fill="#FFFFFF" points="141.258333 228.88448 121.007051 263.90848 161.516667 263.90848"></polygon>
+            <g id="Group" transform="translate(0.000000, 143.616000)">
+                <polygon id="Path" fill="#000000" points="60.6198718 48.95616 60.7608974 48.95616 60.6198718 49.20256"></polygon>
+                <polygon id="Path" fill="#000000" points="27.6057692 28.21632 27.6833333 28.21632 27.6057692 28.35712"></polygon>
+                <rect id="Rectangle" fill="#FFFFFF" x="0.620512821" y="0.5632" width="31.6602564" height="119.73632"></rect>
+            </g>
+            <polygon id="Path" fill="#FFFFFF" points="71.8737179 228.88448 51.6224359 263.90848 92.125 263.90848"></polygon>
+            <polygon id="Path" fill="#FFFFFF" points="71.8737179 179.2032 92.125 144.1792 51.6224359 144.1792"></polygon>
+            <polygon id="Path" fill="#FFFFFF" points="37.4 204.02624 51.0794872 180.37888 64.7589744 204.02624 51.0794872 227.6736"></polygon>
+            <polygon id="Path" fill="#FFFFFF" points="40.4461538 77.46816 62.7070513 38.98048 40.4461538 0.4928 74.8916667 0.4928 97.1455128 38.98048 74.8916667 77.46816"></polygon>
+            <polygon id="Path" fill="#FFFFFF" points="191.576282 179.2032 211.834615 144.1792 171.325 144.1792"></polygon>
+        </g>
+    </g>
+</svg>

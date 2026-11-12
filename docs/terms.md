@@ -1,0 +1,133 @@
+# Page: /terms
+
+- Title: Terms & Conditions
+- Meta description: 
+
+<!-- section: l-container -->
+
+![](images/plex-logo.svg)
+
+## Terms and Conditions
+
+Last updated: April 14, 2020
+
+Please read these terms and conditions carefully before using Our Service.
+
+### Interpretation and Definitions
+
+#### Interpretation
+
+The words of which the initial letter iscapitalized have meanings defined under the following conditions.
+
+The following definitions shall have thesame meaning regardless of whether they appear in singular or in plural.
+
+#### Definitions
+
+For the purposes of these Terms and Conditions:
+
+- **Affiliate** means an entity that controls,is controlled by or is under common control with a party, where"control" means ownership of 50% or more of the shares, equity interest or other securities entitled to vote for election of directors orother managing authority.**‍**
+- **Company** (referred to as either "theCompany", "We", "Us" or "Our" in thisAgreement) refers to Plex Lab AG, c/o Gian Klainguti Bäckerstrasse 27, 8004 Zürich, Switzerland.**‍**
+- **Country** refers to: Switzerland**‍**
+- **Service** refers to the Website
+- ‍**Terms and Conditions** (also referred as"Terms") mean these Terms and Conditions that form the entire agreement between You and the Company regarding the use of the Service.**‍**
+- **Third-party Social Media Service** meansany services or content (including data, information, products or services)provided by a third-party that may be displayed, included or made available by the Service.**‍**
+- **Website** refers to Plex Website, accessible from http://www.plexlab.ch**‍**
+- **You** means the individual accessing orusing the Service, or the company, or other legal entity on behalf of whichsuch individual is accessing or using the Service, as applicable.
+
+### Acknowledgement
+
+These are the Terms and Conditionsgoverning the use of this Service and the agreement that operates between Youand the Company. These Terms and Conditions set out the rights and obligationsof all users regarding the use of the Service.
+
+Your access to and use of the Service isconditioned on Your acceptance of and compliance with these Terms andConditions. These Terms and Conditions apply to all visitors, users and otherswho access or use the Service.
+
+By accessing or using the Service You agreeto be bound by these Terms and Conditions. If You disagree with any part ofthese Terms and Conditions then You may not access the Service.
+
+Your access to and use of the Service isalso conditioned on Your acceptance of and compliance with the Privacy Policyof the Company. Our Privacy Policy describes Our policies and procedures on thecollection, use and disclosure of Your personal information when You use theApplication or the Website and tells You about Your privacy rights and how thelaw protects You. Please read Our Privacy Policy carefully before using OurService.
+
+### Links to Other Websites
+
+Our Service may contain links tothird-party web sites or services that are not owned or controlled by theCompany.
+
+The Company has no control over, andassumes no responsibility for, the content, privacy policies, or practices ofany third party web sites or services. You further acknowledge and agree thatthe Company shall not be responsible or liable, directly or indirectly, for anydamage or loss caused or alleged to be caused by or in connection with the useof or reliance on any such content, goods or services available on or throughany such web sites or services.
+
+We strongly advise You to read the termsand conditions and privacy policies of any third-party web sites or servicesthat You visit.
+
+### Termination
+
+We may terminate or suspend Your accessimmediately, without prior notice or liability, for any reason whatsoever,including without limitation if You breach these Terms and Conditions.
+
+Upon termination, Your right to use the Servicewill cease immediately.
+
+### Limitation of Liability
+
+Notwithstanding any damages that You mightincur, the entire liability of the Company and any of its suppliers under anyprovision of this Terms and Your exclusive remedy for all of the foregoing shallbe limited to the amount actually paid by You through the Service or 100 USD ifYou haven't purchased anything through the Service.
+
+To the maximum extent permitted byapplicable law, in no event shall the Company or its suppliers be liable forany special, incidental, indirect, or consequential damages whatsoever(including, but not limited to, damages for loss of profits, loss of data orother information, for business interruption, for personal injury, loss ofprivacy arising out of or in any way related to the use of or inability to usethe Service, third-party software and/or third-party hardware used with theService, or otherwise in connection with any provision of this Terms), even ifthe Company or any supplier has been advised of the possibility of such damagesand even if the remedy fails of its essential purpose.
+
+Some states do not allow the exclusion ofimplied warranties or limitation of liability for incidental or consequentialdamages, which means that some of the above limitations may not apply. In thesestates, each party's liability will be limited to the greatest extent permittedby law.
+
+### "AS IS" and "ASAVAILABLE" Disclaimer
+
+The Service is provided to You "ASIS" and "AS AVAILABLE" and with all faults and defects withoutwarranty of any kind. To the maximum extent permitted under applicable law, theCompany, on its own behalf and on behalf of its Affiliates and its and theirrespective licensors and service providers, expressly disclaims all warranties,whether express, implied, statutory or otherwise, with respect to the Service,including all implied warranties of merchantability, fitness for a particularpurpose, title and non-infringement, and warranties that may arise out ofcourse of dealing, course of performance, usage or trade practice. Withoutlimitation to the foregoing, the Company provides no warranty or undertaking,and makes no representation of any kind that the Service will meet Yourrequirements, achieve any intended results, be compatible or work with anyother software, applications, systems or services, operate withoutinterruption, meet any performance or reliability standards or be error free orthat any errors or defects can or will be corrected.
+
+Without limiting the foregoing, neither theCompany nor any of the company's provider makes any representation or warrantyof any kind, express or implied: (i) as to the operation or availability of theService, or the information, content, and materials or products includedthereon; (ii) that the Service will be uninterrupted or error-free; (iii) as tothe accuracy, reliability, or currency of any information or content providedthrough the Service; or (iv) that the Service, its servers, the content, ore-mails sent from or on behalf of the Company are free of viruses, scripts, trojanhorses, worms, malware, timebombs or other harmful components.
+
+Some jurisdictions do not allow theexclusion of certain types of warranties or limitations on applicable statutoryrights of a consumer, so some or all of the above exclusions and limitationsmay not apply to You. But in such a case the exclusions and limitations setforth in this section shall be applied to the greatest extent enforceable underapplicable law.
+
+### Governing Law
+
+The laws of the Country, excluding itsconflicts of law rules, shall govern this Terms and Your use of the Service.Your use of the Application may also be subject to other local, state,national, or international laws.
+
+### Disputes Resolution
+
+If You have any concern or dispute aboutthe Service, You agree to first try to resolve the dispute informally bycontacting the Company.
+
+#### For European Union (EU) Users
+
+If You are a European Union consumer, youwill benefit from any mandatory provisions of the law of the country in whichyou are resident in.
+
+#### United States Legal Compliance
+
+You represent and warrant that (i) You arenot located in a country that is subject to the United States governmentembargo, or that has been designated by the United States government as a“terrorist supporting” country, and (ii) You are not listed on any UnitedStates government list of prohibited or restricted parties.
+
+### Severability and Waiver
+
+#### Severability
+
+If any provision of these Terms is held tobe unenforceable or invalid, such provision will be changed and interpreted toaccomplish the objectives of such provision to the greatest extent possibleunder applicable law and the remaining provisions will continue in full forceand effect.
+
+#### Waiver
+
+Except as provided herein, the failure toexercise a right or to require performance of an obligation under this Termsshall not effect a party's ability to exercise such right or require suchperformance at any time thereafter nor shall be the waiver of a breachconstitute a waiver of any subsequent breach.
+
+### Translation Interpretation
+
+These Terms and Conditions may have beentranslated if We have made them available to You on our Service.
+
+You agree that the original English textshall prevail in the case of a dispute.
+
+### Changes to These Terms and Conditions
+
+We reserve the right, at Our solediscretion, to modify or replace these Terms at any time. If a revision ismaterial We will make reasonable efforts to provide at least 30 days' noticeprior to any new terms taking effect. What constitutes a material change willbe determined at Our sole discretion.
+
+By continuing to access or use Our Serviceafter those revisions become effective, You agree to be bound by the revisedterms. If You do not agree to the new terms, in whole or in part, please stopusing the website and the Service.
+
+### Contact Us
+
+If you have any questions about these Termsand Conditions, You can contact us:
+
+By email: info@plexlab.ch
+
+<!-- section: c-footer -->
+
+![](images/plex-icon.svg)
+
+Terms & Conditions
+
+**·**
+
+Privacy Policy
+
+**·**
+
+© 2024 Plex Lab AG ®
