@@ -40,6 +40,13 @@
     <p class="sub">Invite by link, play owners, win your copy. Coming next.</p>
   </section>
 
+  <section class="card">
+    <h2>Patterns</h2>
+    <p class="sub" id="patterns-sub">Every finished game leaves a pattern. Win one that has never been played and you may name it.</p>
+    <ul id="patterns" class="patterns"></ul>
+    <button class="btn" id="copy-games" hidden>Copy game log</button>
+  </section>
+
   <nav class="home-links">
     <a href="../rules.html">Rules</a>
     <a href="../">plex.swiss</a>
@@ -76,8 +83,16 @@
   <p id="over-sub"></p>
   <p id="over-score"></p>
   <p id="over-note"></p>
+  <div id="over-pattern" hidden>
+    <p id="pattern-line"></p>
+    <form id="claim" hidden>
+      <input id="claim-name" maxlength="40" placeholder="Name this pattern" aria-label="Pattern name" autocomplete="off" required>
+      <button class="btn" type="submit">Claim</button>
+    </form>
+  </div>
   <button class="btn primary" data-act="rematch">Rematch</button>
   <button class="btn" data-act="view">Look at the board</button>
+  <button class="btn" data-act="copy">Copy game</button>
   <button class="btn" data-act="home">Back to home</button>
 </dialog>
 

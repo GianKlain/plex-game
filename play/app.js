@@ -11,6 +11,7 @@
   const ui = {
     mode: 'ai', level: 'easy', human: 'Y',
     game: null, ghost: null, grid: true, busy: false, view: null,
+    log: [], saved: false, rec: null,
   };
 
   // lattice vertex -> board units (stones stand upright like in the video)
@@ -70,15 +71,7 @@
       svg.appendChild(layer);
     }
 
-    for (const [k, cell] of g.cells) {
-      if (cell.t === 'V') svg.appendChild(el('polygon', { points: poly(P.cellVerts(P.unkey(k))), class: 'void' }));
-      else if (cell.t[0] === 'p') svg.appendChild(el('polygon', { points: poly(P.cellVerts(P.unkey(k))), class: 'pt ' + cell.t }));
-    }
-    svg.appendChild(el('polygon', { points: poly(P.stoneOutline(0, 0, 0)), class: 'stone R' }));
-    for (const [id, st] of g.stones) {
-      svg.appendChild(el('polygon', { points: poly(P.stoneOutline(st.a, st.b, st.r)), class: 'stone ' + st.owner }));
-      if (g.last && g.last.id === id) svg.appendChild(el('polygon', { points: poly(P.stoneOutline(st.a, st.b, st.r)), class: 'last' }));
-    }
+    drawPieces(svg, g, true);
     if (ui.ghost && !g.winner && canAct()) {
       const gh = ui.ghost, ok = P.isLegal(g, gh.a, gh.b, gh.r);
       svg.appendChild(el('polygon', { points: poly(P.stoneOutline(gh.a, gh.b, gh.r)), class: 'ghost ' + g.turn + (ok ? '' : ' bad') }));
@@ -89,6 +82,32 @@
     $('rotate-btn').disabled = !canAct() || !!g.winner;
     renderBars();
     renderHint();
+  }
+
+  function drawPieces(svg, g, markLast) {
+    for (const [k, cell] of g.cells) {
+      if (cell.t === 'V') svg.appendChild(el('polygon', { points: poly(P.cellVerts(P.unkey(k))), class: 'void' }));
+      else if (cell.t[0] === 'p') svg.appendChild(el('polygon', { points: poly(P.cellVerts(P.unkey(k))), class: 'pt ' + cell.t }));
+    }
+    svg.appendChild(el('polygon', { points: poly(P.stoneOutline(0, 0, 0)), class: 'stone R' }));
+    for (const [id, st] of g.stones) {
+      svg.appendChild(el('polygon', { points: poly(P.stoneOutline(st.a, st.b, st.r)), class: 'stone ' + st.owner }));
+      if (markLast && g.last && g.last.id === id) svg.appendChild(el('polygon', { points: poly(P.stoneOutline(st.a, st.b, st.r)), class: 'last' }));
+    }
+  }
+
+  // small picture of a finished pattern
+  function thumb(g) {
+    const svg = el('svg', { class: 'thumb', 'aria-hidden': 'true' });
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (const k of g.cells.keys()) for (const v of P.cellVerts(P.unkey(k))) {
+      const p = pos(v[0], v[1]);
+      x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]);
+    }
+    const side = Math.max(x1 - x0, y1 - y0) + 0.6;
+    svg.setAttribute('viewBox', `${(x0 + x1 - side) / 2} ${(y0 + y1 - side) / 2} ${side} ${side}`);
+    drawPieces(svg, g, false);
+    return svg;
   }
 
   function label(p) {
@@ -156,6 +175,7 @@
   function commit(a, b, r) {
     const prev = ui.game;
     ui.game = P.play(prev, a, b, r);
+    ui.log.push([a, b, r]);
     announce(prev);
     if (ui.game.winner) { ui.ghost = null; render(); setTimeout(showOver, 700); return; }
     if (canAct()) suggestGhost();
@@ -185,7 +205,7 @@
       title = won ? 'You won' : 'You lost';
       sub = g.reason === 'surround' ? surround : g.reason === 'points' ? 'on points' : 'by resignation';
       if (won) note = 'To earn a real set you need to beat someone who owns one. Online play against owners is coming next.';
-      record(won);
+      if (!ui.saved) record(won);
     } else {
       title = NAMES[g.winner] + ' wins';
       sub = g.reason === 'surround' ? surround : g.reason === 'points' ? 'on points' : 'by resignation';
@@ -194,8 +214,110 @@
     $('over-sub').textContent = sub;
     $('over-score').textContent = g.reason === 'points' ? `${g.points.Y} – ${g.points.B}` : '';
     $('over-note').textContent = note;
+    saveGame();
+    showPattern();
     $('over').showModal();
   }
+
+  // ---- game log and patterns ----
+  // Kept in this browser only. "New" means new on this device until there is
+  // a shared registry; the pattern codes are made so that one can take over.
+  const store = {
+    get(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } },
+  };
+
+  function saveGame() {
+    const g = ui.game;
+    if (ui.saved || !g || ui.log.length < 2) return;
+    ui.saved = true;
+    const finished = !!g.winner && g.reason !== 'resign';
+    const rec = {
+      v: 1, date: new Date().toISOString(), mode: ui.mode,
+      level: ui.mode === 'ai' ? ui.level : null, human: ui.mode === 'ai' ? ui.human : null,
+      moves: ui.log.slice(), winner: g.winner, reason: g.reason || 'abandoned',
+      points: [g.points.Y, g.points.B], pattern: finished ? P.patternId(g) : null,
+    };
+    const games = store.get('plex-games', []);
+    games.push(rec);
+    store.set('plex-games', games.slice(-300));
+    ui.rec = rec;
+    if (finished) {
+      const ps = store.get('plex-patterns', {});
+      const p = ps[rec.pattern] || (ps[rec.pattern] = { key: P.patternKey(g), first: rec.date, moves: rec.moves, winner: g.winner, count: 0, name: null });
+      p.count++;
+      store.set('plex-patterns', ps);
+    }
+  }
+
+  function showPattern() {
+    const g = ui.game, rec = ui.rec, box = $('over-pattern'), form = $('claim');
+    form.hidden = true;
+    box.hidden = !(rec && rec.pattern);
+    if (box.hidden) return;
+    const p = store.get('plex-patterns', {})[rec.pattern] || { count: 1 };
+    const seen = p.count > 1 ? `played ${p.count} times on this device` : 'never played on this device before';
+    let line;
+    if (p.name) line = `Pattern “${p.name}” · ${rec.pattern} · ${seen}.`;
+    else if (g.winner === 'draw') line = `Pattern ${rec.pattern}, ${seen}. A draw, so nobody names it.`;
+    else if (ui.mode === 'ai' && g.winner !== ui.human) line = `Pattern ${rec.pattern}, ${seen}. The computer won it, so it stays unnamed.`;
+    else {
+      line = `${p.count > 1 ? 'Unnamed pattern' : 'New pattern'} ${rec.pattern}, ${seen}. ${ui.mode === 'ai' ? 'You' : NAMES[g.winner]} may name it.`;
+      form.hidden = false;
+      $('claim-name').value = '';
+    }
+    $('pattern-line').textContent = line;
+  }
+
+  $('claim').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const name = $('claim-name').value.trim().replace(/\s+/g, ' ');
+    if (!name || !ui.rec || !ui.rec.pattern) return;
+    const ps = store.get('plex-patterns', {}), p = ps[ui.rec.pattern];
+    if (!p || p.name) return;
+    p.name = name;
+    p.by = ui.mode === 'ai' ? 'You' : NAMES[ui.game.winner];
+    p.claimed = new Date().toISOString();
+    store.set('plex-patterns', ps);
+    ui.rec.name = name;
+    $('claim').hidden = true;
+    $('pattern-line').textContent = `Claimed: “${name}” · ${ui.rec.pattern}.`;
+  });
+
+  function copyText(text, btn) {
+    const done = () => { const t = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = t; }, 1500); };
+    const fallback = () => {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      (btn.closest('dialog') || document.body).appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* nothing more to try */ }
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+
+  function showPatterns() {
+    const ps = store.get('plex-patterns', {}), games = store.get('plex-games', []);
+    const all = Object.keys(ps), named = all.filter((id) => ps[id].name).sort((x, y) => (ps[y].claimed || '').localeCompare(ps[x].claimed || ''));
+    const list = $('patterns');
+    list.textContent = '';
+    for (const id of named) {
+      const li = document.createElement('li');
+      try { li.appendChild(thumb(P.replay(ps[id].moves))); } catch (e) { /* rules changed since: no picture */ }
+      const txt = document.createElement('span');
+      const b = document.createElement('b'); b.textContent = ps[id].name;
+      const c = document.createElement('small'); c.textContent = `${id} · ${(ps[id].claimed || '').slice(0, 10)}`;
+      txt.append(b, c);
+      li.appendChild(txt);
+      list.appendChild(li);
+    }
+    if (all.length) $('patterns-sub').textContent = `${all.length} pattern${all.length > 1 ? 's' : ''} played on this device, ${named.length} named. Win a new one and you may name it.`;
+    $('copy-games').hidden = !games.length;
+    $('copy-games').textContent = `Copy game log (${games.length})`;
+  }
+  $('copy-games').addEventListener('click', () => copyText(JSON.stringify(store.get('plex-games', [])), $('copy-games')));
 
   function record(won) {
     try {
@@ -217,6 +339,7 @@
     ui.mode = mode;
     ui.game = P.newGame();
     ui.ghost = null; ui.busy = false;
+    ui.log = []; ui.saved = false; ui.rec = null;
     $('home').hidden = true; $('game').hidden = false;
     suggestGhost();
     render();
@@ -225,6 +348,7 @@
     ui.game = null;
     $('game').hidden = true; $('home').hidden = false;
     showRecord();
+    showPatterns();
   }
 
   // ---- input ----
@@ -290,18 +414,25 @@
   });
   const act = (ev) => {
     const b = ev.target.closest('button'); if (!b) return;
-    $('menu').close(); $('over').close();
     const a = b.dataset.act;
+    if (!a) return;
+    if (a === 'copy') { if (ui.rec) copyText(JSON.stringify(ui.rec), b); return; }
+    $('menu').close(); $('over').close();
     if (a === 'grid') { ui.grid = !ui.grid; render(); }
-    if (a === 'rematch') {
-      if (ui.mode === 'ai' && !ui.game.winner && ui.game.moves > 1) record(false);
-      start(ui.mode);
+    if (a === 'rematch' || a === 'home') {
+      // leaving a running game: it goes into the log as resigned
+      if (!ui.game.winner && ui.log.length > 1) {
+        if (ui.mode === 'ai') record(false);
+        ui.game = P.resign(ui.game, ui.mode === 'ai' ? ui.human : ui.game.turn);
+        saveGame();
+      }
+      if (a === 'rematch') start(ui.mode); else goHome();
     }
-    if (a === 'home') goHome();
   };
   $('menu').addEventListener('click', act);
   $('over').addEventListener('click', act);
 
   showRecord();
+  showPatterns();
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();

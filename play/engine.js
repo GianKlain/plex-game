@@ -247,8 +247,59 @@
     return s;
   }
 
+  // ---- patterns ----
+  // The red stone fixes position and rotation of every pattern, so the only
+  // symmetry left is the mirror across the red stone's axis: (a,b) -> (-b,-a).
+  const mirrorCell = (c) => [-c[1] - 1, -c[0] - 1, 1 - c[2]];
+  const mirrorStone = (st) => ({ a: -st.b, b: -st.a, r: (6 - st.r) % 6 });
+
+  // Canonical description of what lies on the table: every stone with its
+  // colour and seams, every point stone, every void. A pattern and its mirror
+  // image get the same key.
+  function patternKey(s) {
+    const build = (m) => {
+      const items = [];
+      for (const st of s.stones.values()) {
+        const t = m ? mirrorStone(st) : st;
+        items.push(st.owner + t.a + ',' + t.b + ',' + t.r);
+      }
+      for (const [k, cell] of s.cells) {
+        if (cell.t !== 'V' && cell.t[0] !== 'p') continue;
+        const c = m ? mirrorCell(unkey(k)) : unkey(k);
+        items.push((cell.t === 'V' ? 'v' : cell.t === 'pY' ? 'y' : 'b') + key(c));
+      }
+      return items.sort().join(' ');
+    };
+    const k1 = build(false), k2 = build(true);
+    return k1 < k2 ? k1 : k2;
+  }
+
+  // Short code for a pattern, e.g. PX-7K3MQ-9TD2A (50 bits of the key's hash).
+  function patternId(s) {
+    const str = patternKey(s);
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    const A = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+    const five = (h) => { let o = ''; h >>>= 0; for (let i = 0; i < 5; i++) { o += A[h & 31]; h >>>= 5; } return o; };
+    return 'PX-' + five(h1) + '-' + five(h2);
+  }
+
+  // Rebuild a game from its move list [[a,b,r], ...]. Throws on an illegal move.
+  function replay(moves, opts) {
+    let s = newGame(opts);
+    for (const m of moves) s = play(s, m[0], m[1], m[2]);
+    return s;
+  }
+
   root.Plex = {
     DIRS, key, unkey, hex, stoneCells, stoneOutline, cellVerts, edgeNbrs, other,
     newGame, clone, isLegal, legalMoves, play, resign, surrounds, openness, bounds,
+    mirrorCell, mirrorStone, patternKey, patternId, replay,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

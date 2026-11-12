@@ -109,3 +109,21 @@ dialog p { margin: 0; line-height: 1.4; }
 @media (prefers-reduced-motion: no-preference) {
   .ghost { transition: fill-opacity 0.15s; }
 }
+
+/* patterns */
+#over-pattern { border-top: 2px solid var(--ink); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+#pattern-line { font-size: 0.92rem; }
+#claim { display: flex; gap: 8px; }
+#claim input {
+  flex: 1; min-width: 0; border: 2px solid var(--ink); padding: 10px; font: inherit; font-size: 1rem;
+  color: var(--ink); background: var(--paper); border-radius: 0;
+}
+#claim input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+#claim .btn { width: auto; }
+.patterns { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.patterns:empty { display: none; }
+.patterns li { display: flex; align-items: center; gap: 12px; }
+.patterns span { display: flex; flex-direction: column; min-width: 0; }
+.patterns b { overflow-wrap: anywhere; }
+.patterns small { color: var(--muted); font-variant-numeric: tabular-nums; }
+.thumb { width: 64px; height: 64px; flex: none; background: var(--table); }
