@@ -47,6 +47,10 @@ function run(){
   ok(mg&&mg.winner===pg.winner&&mg.points.Y===pg.points.Y,'mirrored game has the same result');
   ok(P.patternId(P.replay(mv.slice(0,3)))!==P.patternId(pg),'different position, different code');
   ok(/^PX-[0-9A-Z]{5}-[0-9A-Z]{5}$/.test(P.patternId(pg)),'code format');
+  // captured stones go to the captor's row (the user's game of 2026-11-13)
+  const cg=P.replay([[0,1,5],[-1,3,1],[0,3,4],[2,1,0],[2,2,5],[1,4,5],[3,0,3],[-1,5,0],[2,-1,2],[4,1,4],[-1,0,1],[-2,2,1],[0,-2,4],[3,3,1]]);
+  ok(cg.taken.Y===1&&cg.taken.B===3,'taken counts 1 / 3');
+  ok(cg.supply.Y===12-7+1&&cg.supply.B===12-7+3,'row = 12 - placed + taken: '+cg.supply.Y+'/'+cg.supply.B);
   out.push(fail?('FAILED '+fail):'ALL PASSED');
   return out.join('\n');
 }

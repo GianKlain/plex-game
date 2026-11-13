@@ -122,7 +122,9 @@
     const fill = (node, p) => {
       node.className = 'bar' + (g.turn === p && !g.winner ? ' active' : '');
       node.innerHTML = `<span class="chip ${p}"></span><span class="name">${label(p)}<br><span class="turn">to move</span></span>`
-        + `<span class="stat">Stones <b>${g.supply[p]}</b></span><span class="stat">Pts <b>${g.points[p]}</b></span>`;
+        + `<span class="stat">Stones <b>${g.supply[p]}</b></span>`
+        + (g.taken[p] ? `<span class="stat taken">Taken <b>${g.taken[p]}</b></span>` : '')
+        + `<span class="stat">Pts <b>${g.points[p]}</b></span>`;
     };
     fill($('bar-top'), top);
     fill($('bar-bottom'), bottom);
@@ -146,7 +148,7 @@
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => t.classList.remove('show'), 2600);
+    toast.timer = setTimeout(() => t.classList.remove('show'), /took/.test(msg) ? 5000 : 2600);
   }
 
   function suggestGhost() {
@@ -167,7 +169,7 @@
     const who = (p) => (ui.mode === 'ai' ? (p === ui.human ? 'You' : 'Computer') : NAMES[p]);
     const parts = [];
     if (l.scored) parts.push(`${who(l.player)} scored ${l.scored} point${l.scored > 1 ? 's' : ''}`);
-    for (const p of ['Y', 'B']) if (l.capturedBy[p]) parts.push(`${who(p)} took ${l.capturedBy[p]} stone${l.capturedBy[p] > 1 ? 's' : ''}`);
+    for (const p of ['Y', 'B']) if (l.capturedBy[p]) parts.push(`${who(p)} took ${l.capturedBy[p]} stone${l.capturedBy[p] > 1 ? 's' : ''} and now ${who(p) === 'You' ? 'have' : 'has'} ${g.supply[p]} to place`);
     if (!g.winner && prev && g.turn === prev.turn) parts.push(`${who(P.other(g.turn))} has no stones left`);
     if (parts.length) toast(parts.join(' · '));
   }
@@ -431,6 +433,9 @@
   };
   $('menu').addEventListener('click', act);
   $('over').addEventListener('click', act);
+
+  // for watching and replaying a game from outside (teaching sessions, tests)
+  window.PlexApp = { get game() { return ui.game; }, get log() { return ui.log; }, get mode() { return ui.mode; }, play: commit };
 
   showRecord();
   showPatterns();

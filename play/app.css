@@ -127,3 +127,5 @@ dialog p { margin: 0; line-height: 1.4; }
 .patterns b { overflow-wrap: anywhere; }
 .patterns small { color: var(--muted); font-variant-numeric: tabular-nums; }
 .thumb { width: 64px; height: 64px; flex: none; background: var(--table); }
+.bar .stat.taken b { color: var(--red); }
+.bar.active .stat.taken b { color: var(--yellow); }

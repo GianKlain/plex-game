@@ -54,6 +54,7 @@
       nextId: 1,
       supply: { Y: stones, B: stones },
       points: { Y: 0, B: 0 },
+      taken: { Y: 0, B: 0 },   // stones each player has eaten so far
       turn: 'Y',
       winner: null,   // 'Y' | 'B' | 'draw'
       reason: null,   // 'surround' | 'points' | 'resign' | 'timeout'
@@ -71,6 +72,7 @@
       nextId: s.nextId,
       supply: { Y: s.supply.Y, B: s.supply.B },
       points: { Y: s.points.Y, B: s.points.B },
+      taken: { Y: s.taken.Y, B: s.taken.B },
       turn: s.turn, winner: s.winner, reason: s.reason, moves: s.moves, last: s.last,
     };
   }
@@ -179,6 +181,7 @@
       for (const c of stoneCells(st.a, st.b, st.r)) s.cells.set(key(c), { t: 'V', id: -1 });
       s.stones.delete(id);
       s.supply[captor]++;
+      s.taken[captor]++;
     }
     return taken.length;
   }
