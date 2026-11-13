@@ -51,6 +51,18 @@ function run(){
   const cg=P.replay([[0,1,5],[-1,3,1],[0,3,4],[2,1,0],[2,2,5],[1,4,5],[3,0,3],[-1,5,0],[2,-1,2],[4,1,4],[-1,0,1],[-2,2,1],[0,-2,4],[3,3,1]]);
   ok(cg.taken.Y===1&&cg.taken.B===3,'taken counts 1 / 3');
   ok(cg.supply.Y===12-7+1&&cg.supply.B===12-7+3,'row = 12 - placed + taken: '+cg.supply.Y+'/'+cg.supply.B);
+  // a ring needs at least one stone of the attacker: common ground alone leaves an island
+  const isl=P.newGame(); const put=(c,t)=>isl.cells.set(P.key(c),{t,id:-1});
+  const ist={owner:'B',a:6,b:6,r:0}; isl.stones.set(90,ist);
+  const icells=P.stoneCells(6,6,0); icells.forEach(c=>isl.cells.set(P.key(c),{t:'B',id:90}));
+  const iown=new Set(icells.map(P.key)); const ring=[];
+  icells.forEach(c=>P.edgeNbrs(c).forEach(n=>{ if(!iown.has(P.key(n))) ring.push(n); }));
+  ring.forEach((c,i)=>put(c,i%2?'pY':'V'));
+  let i1=P.play(isl,0,1,5);
+  ok(i1.stones.has(90)&&i1.taken.Y===0,'stone ringed by common ground only stays as an island');
+  put(ring[0],'Y'); // one yellow stone cell in the ring
+  let i2=P.play(isl,0,1,5);
+  ok(!i2.stones.has(90)&&i2.taken.Y===1,'one attacker stone in the ring is enough to eat it');
   out.push(fail?('FAILED '+fail):'ALL PASSED');
   return out.join('\n');
 }

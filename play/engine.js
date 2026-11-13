@@ -150,11 +150,24 @@
 
   const redCells = () => stoneCells(0, 0, 0);
 
-  // Is the red stone enclosed by player p (own colour + common ground)?
+  // Does the wall around a flooded region contain at least one stone of p?
+  // Common ground alone attacks nobody: a ring needs a stone of the attacker.
+  function wallHas(s, visited, p) {
+    for (const k of visited) {
+      for (const n of edgeNbrs(unkey(k))) {
+        const cell = s.cells.get(key(n));
+        if (cell && cell.t === p) return true;
+      }
+    }
+    return false;
+  }
+
+  // Is the red stone enclosed by player p (own colour + common ground,
+  // with at least one own stone in the ring)?
   function surrounds(s, p, bb) {
     const o = other(p);
     const res = flood(s, redCells(), (cell) => !cell || cell.t === o, bb || bounds(s, 2));
-    return !res.escaped;
+    return !res.escaped && wallHas(s, res.visited, p);
   }
 
   // How open the red stone still is against player p (smaller = closer to a win).
@@ -174,7 +187,8 @@
       const ids = new Set();
       for (const k of res.visited) { const cell = s.cells.get(k); if (cell && cell.t === victim) ids.add(cell.id); }
       for (const i of ids) done.add(i);
-      if (!res.escaped) for (const i of ids) taken.push(i);
+      // enclosed by common ground only: it stays as an isolated island
+      if (!res.escaped && wallHas(s, res.visited, captor)) for (const i of ids) taken.push(i);
     }
     for (const id of taken) {
       const st = s.stones.get(id);

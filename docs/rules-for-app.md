@@ -17,7 +17,8 @@ Lines marked **(assumed)** are not stated or shown in the video; they are defaul
 
 ## Rule 1 — surround the red stone
 - You win at once when the red stone is enclosed by your colour.
-- The enclosure may also use common ground (point stones of either colour, and empty spaces left by captured stones).
+- The enclosure may also use common ground (point stones of either colour, and empty spaces left by captured stones). Common ground is neutral territory: it connects your colour, whoever made the points (confirmed 2026-11-13).
+- The ring needs at least one stone of your own colour. Common ground alone surrounds nothing (confirmed for captures 2026-11-13; applied to the red stone by the same logic).
 - Opponent stones may sit inside the enclosure; they do not break it.
 - Test used by the app: starting from the red stone and walking across edges through opponent stones and open grid only, you cannot reach the outside. Stones that meet at a corner close the gap between them (the 1:20 example scores two points this way).
 
@@ -29,6 +30,7 @@ Lines marked **(assumed)** are not stated or shown in the video; they are defaul
 
 ## Rule 3 — eating
 - If an opponent's stone is completely enclosed by your colour, the red stone and/or common ground, you take it off the table.
+- At least one of your stones must be part of the ring to attack it. A stone enclosed by common ground only stays where it is, as an isolated island (confirmed 2026-11-13).
 - It changes to your colour and joins your row, so you have one more stone to place later.
 - The space it leaves stays empty for the rest of the game and is common ground.
 - You can lose your own stones this way through your own move (the 2:37 example: yellow scores 4 points and landlocks two of its own stones, which blue then takes).
