@@ -45,8 +45,8 @@
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
     const add = (v) => { const p = pos(v[0], v[1]); x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); };
     for (const k of ui.game.cells.keys()) P.cellVerts(P.unkey(k)).forEach(add);
-    const pad = 3.2;
-    let w = Math.max(x1 - x0 + pad * 2, 9), h = Math.max(y1 - y0 + pad * 2, 9);
+    const pad = 2.2;
+    let w = Math.max(x1 - x0 + pad * 2, 7.5), h = Math.max(y1 - y0 + pad * 2 + 2.5, 11);
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     return { x: cx - w / 2, y: cy - h / 2, w, h };
   }
@@ -71,10 +71,21 @@
       svg.appendChild(layer);
     }
 
-    drawPieces(svg, g, true);
-    if (ui.ghost && !g.winner && canAct()) {
-      const gh = ui.ghost, ok = P.isLegal(g, gh.a, gh.b, gh.r);
-      svg.appendChild(el('polygon', { points: poly(P.stoneOutline(gh.a, gh.b, gh.r)), class: 'ghost ' + g.turn + (ok ? '' : ' bad') }));
+    const showGhost = ui.ghost && !g.winner && canAct();
+    const ok = showGhost && P.isLegal(g, ui.ghost.a, ui.ghost.b, ui.ghost.r);
+    const layer = el('g', { class: 'pieces' + (showGhost && !ok ? ' dim' : '') });
+    drawPieces(layer, g, true);
+    svg.appendChild(layer);
+    if (showGhost) {
+      const gh = ui.ghost, out = P.stoneOutline(gh.a, gh.b, gh.r);
+      svg.appendChild(el('polygon', { points: poly(out), class: 'ghost ' + g.turn + (ok ? '' : ' bad') }));
+      // badge inside the stone: halfway from its centre corner to the middle rim corner
+      const c = pos(gh.a, gh.b), m = pos(out[3][0], out[3][1]);
+      const bx = (c[0] + m[0]) / 2, by = (c[1] + m[1]) / 2;
+      const badge = el('g', { class: 'badge ' + (ok ? 'ok' : 'bad'), transform: `translate(${bx.toFixed(3)} ${by.toFixed(3)})` });
+      badge.appendChild(el('circle', { r: 0.24 }));
+      badge.appendChild(el('path', { d: ok ? 'M-0.1 0.01 -0.03 0.08 0.11 -0.07' : 'M-0.08 -0.08 0.08 0.08M0.08 -0.08 -0.08 0.08' }));
+      svg.appendChild(badge);
       $('place-btn').disabled = !ok;
     } else {
       $('place-btn').disabled = true;
@@ -115,16 +126,20 @@
     return NAMES[p];
   }
 
+  const CHEVRON = '<svg viewBox="0 0 14 10" aria-hidden="true"><path d="M7 0 14 4v6L7 6 0 10V4z" fill="currentColor"/></svg>';
+  const TRI = '<svg viewBox="0 0 12 11" aria-hidden="true"><path d="M6 0 12 11H0z" fill="currentColor"/></svg>';
+
   function renderBars() {
     const g = ui.game;
     const bottom = ui.mode === 'ai' ? ui.human : 'Y';
     const top = P.other(bottom);
     const fill = (node, p) => {
-      node.className = 'bar' + (g.turn === p && !g.winner ? ' active' : '');
-      node.innerHTML = `<span class="chip ${p}"></span><span class="name">${label(p)}<br><span class="turn">to move</span></span>`
-        + `<span class="stat">Stones <b>${g.supply[p]}</b></span>`
-        + (g.taken[p] ? `<span class="stat taken">Taken <b>${g.taken[p]}</b></span>` : '')
-        + `<span class="stat">Pts <b>${g.points[p]}</b></span>`;
+      node.className = 'pbar' + (g.turn === p && !g.winner ? ' active' : '');
+      node.innerHTML = `<span class="avatar ${p}">${label(p)[0]}</span>`
+        + `<span class="name"><span>${label(p)}</span><span class="turn">to move</span></span>`
+        + `<span class="count ${p}" title="Stones left to place" aria-label="${g.supply[p]} stones left">${CHEVRON}${g.supply[p]}</span>`
+        + (g.taken[p] ? `<span class="taken" title="Stones taken">+${g.taken[p]} taken</span>` : '')
+        + `<span class="pts ${p}">${TRI}<b>${g.points[p]}</b> Pts</span>`;
     };
     fill($('bar-top'), top);
     fill($('bar-bottom'), bottom);
@@ -135,10 +150,10 @@
     let t = '';
     if (g.winner) t = 'Game over.';
     else if (!canAct()) t = 'Computer is thinking…';
-    else if (ui.ghost && !P.isLegal(g, ui.ghost.a, ui.ghost.b, ui.ghost.r)) t = 'Not there: it must lie free and touch the pattern with at least two corners.';
-    else if (g.moves < 2) t = 'Tap the board to move your stone. Tap the stone to rotate it. Then end your turn.';
-    else t = 'Move or rotate again, or end your turn.';
-    $('hint').textContent = t;
+    else if (ui.ghost && !P.isLegal(g, ui.ghost.a, ui.ghost.b, ui.ghost.r)) t = g.moves < 2 ? 'Good, now align it with the red stone.' : 'Not there. Two corners must touch the pattern.';
+    else if (g.moves < 2) t = 'Tap to move, tap the stone to rotate, then <b>end turn →</b>';
+    else t = 'Move or rotate again or <b>end turn →</b>';
+    $('hint').innerHTML = t;
   }
 
   const canAct = () => !ui.busy && (ui.mode === 'local' || ui.game.turn === ui.human);
@@ -204,8 +219,9 @@
     if (g.winner === 'draw') { title = 'Draw'; sub = 'Equal points.'; }
     else if (ui.mode === 'ai') {
       const won = g.winner === ui.human;
-      title = won ? 'You won' : 'You lost';
+      title = won ? 'You won!' : 'You lost';
       sub = g.reason === 'surround' ? surround : g.reason === 'points' ? 'on points' : 'by resignation';
+      sub = 'by ' + sub.replace(/^by /, '').replace(/^on /, '');
       if (won) note = 'To earn a real set you need to beat someone who owns one. Online play against owners is coming next.';
       if (!ui.saved) record(won);
     } else {
@@ -214,7 +230,7 @@
     }
     $('over-title').textContent = title;
     $('over-sub').textContent = sub;
-    $('over-score').textContent = g.reason === 'points' ? `${g.points.Y} – ${g.points.B}` : '';
+    $('over-score').innerHTML = `<span class="avatar Y">${label('Y')[0]}</span>${g.points.Y} – ${g.points.B} pts<span class="avatar B">${label('B')[0]}</span>`;
     $('over-note').textContent = note;
     saveGame();
     showPattern();
@@ -328,13 +344,33 @@
       localStorage.setItem('plex-record', JSON.stringify(r));
     } catch (e) { /* storage unavailable */ }
   }
+  const REASON = { surround: 'red stone surrounded', points: 'on points', resign: 'resigned', abandoned: 'abandoned' };
   function showRecord() {
-    let t = '';
-    try {
-      const r = JSON.parse(localStorage.getItem('plex-record') || 'null');
-      if (r && r.w + r.l) t = `Your record: ${r.w} won, ${r.l} lost`;
-    } catch (e) { /* storage unavailable */ }
-    $('record').textContent = t;
+    const games = store.get('plex-games', []), ps = store.get('plex-patterns', {});
+    const list = $('archive');
+    list.textContent = '';
+    let w = 0, l = 0;
+    for (const g of games) if (g.mode === 'ai' && g.winner && g.winner !== 'draw') { if (g.winner === g.human) w++; else l++; }
+    for (const g of games.slice(-10).reverse()) {
+      const li = document.createElement('li');
+      const ai = g.mode === 'ai';
+      const av = document.createElement('span'); av.className = 'avatar'; av.textContent = ai ? 'C' : '2';
+      const who = document.createElement('span'); who.className = 'who';
+      const b = document.createElement('b'); b.textContent = ai ? 'Computer · ' + g.level : 'Two players';
+      const sm = document.createElement('small');
+      const name = g.pattern && ps[g.pattern] && ps[g.pattern].name;
+      sm.textContent = `${g.date.slice(0, 10)} · ${REASON[g.reason] || g.reason} · ${g.points[0]}–${g.points[1]}` + (name ? ` · “${name}”` : '');
+      who.append(b, sm);
+      const pill = document.createElement('span');
+      const res = g.winner === 'draw' ? 'd' : ai ? (g.winner === g.human ? 'w' : 'l') : 'd';
+      pill.className = 'pill ' + res;
+      pill.textContent = g.winner === 'draw' ? 'D' : ai ? res.toUpperCase() : (g.winner === 'Y' ? 'Yellow' : 'Blue');
+      li.append(av, who, pill);
+      list.appendChild(li);
+    }
+    $('archive-empty').hidden = games.length > 0;
+    $('w-pct').hidden = $('l-pct').hidden = !(w + l);
+    if (w + l) { const p = Math.round(100 * w / (w + l)); $('w-pct').textContent = `W ${p} %`; $('l-pct').textContent = `L ${100 - p} %`; }
   }
 
   function start(mode) {
@@ -405,6 +441,7 @@
   $('levels').addEventListener('click', (ev) => {
     const b = ev.target.closest('button'); if (!b) return;
     ui.level = b.dataset.level;
+    $('ai-sub').textContent = 'Level ' + ui.level;
     for (const x of $('levels').children) x.setAttribute('aria-checked', String(x === b));
   });
   $('start-ai').addEventListener('click', () => start('ai'));

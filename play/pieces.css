@@ -1,0 +1,17 @@
+/* Colours and board pieces, shared by the app and the rules page. */
+:root {
+  --yellow: #ffc02e;
+  --blue: #5b7fd6;
+  --stone-red: #ff4b3e;
+  --orange: #ff8a1e;
+  --violet: #b93cc0;
+  --table: #eceef3;
+}
+.stone { stroke: rgba(255, 255, 255, 0.55); stroke-width: 0.03; stroke-linejoin: round; }
+.stone.Y { fill: var(--yellow); }
+.stone.B { fill: var(--blue); }
+.stone.R { fill: var(--stone-red); }
+.pt { stroke: rgba(255, 255, 255, 0.55); stroke-width: 0.03; stroke-linejoin: round; }
+.pt.pY { fill: var(--orange); }
+.pt.pB { fill: var(--violet); }
+.void { fill: rgba(60, 70, 100, 0.06); stroke: rgba(60, 70, 100, 0.3); stroke-width: 0.025; stroke-dasharray: 0.09 0.07; }
