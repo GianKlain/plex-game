@@ -173,6 +173,13 @@ dialog::backdrop { background: rgba(38, 39, 44, 0.9); }
 dialog p { margin: 0; line-height: 1.4; }
 dialog .btn.outline { color: #fff; border-color: var(--primary); }
 .link { appearance: none; background: none; border: 0; color: #fff; padding: 12px; font-size: 1rem; cursor: pointer; text-align: center; }
+#invite h2 { text-align: center; letter-spacing: 0.14em; font-size: 0.95rem; font-weight: 700; margin: 12px 0 4px; }
+#invite-box { display: flex; flex-direction: column; gap: 12px; text-align: center; }
+#invite-link {
+  border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 999px; padding: 12px 16px; font: inherit; font-size: 0.85rem;
+  color: #fff; background: rgba(255, 255, 255, 0.08); text-align: center; width: 100%;
+}
+#invite-status { text-align: center; color: rgba(255, 255, 255, 0.8); min-height: 1.4em; }
 #menu h2 { text-align: center; letter-spacing: 0.14em; font-size: 0.95rem; font-weight: 700; margin: 12px 0 8px; }
 #menu .btn { margin-top: 10px; }
 

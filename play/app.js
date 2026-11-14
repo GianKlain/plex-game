@@ -11,7 +11,7 @@
   const ui = {
     mode: 'ai', level: 'easy', human: 'Y',
     game: null, ghost: null, grid: true, busy: false, view: null,
-    log: [], saved: false, rec: null,
+    log: [], saved: false, rec: null, linked: false,
   };
 
   // lattice vertex -> board units (stones stand upright like in the video)
@@ -123,6 +123,7 @@
 
   function label(p) {
     if (ui.mode === 'ai') return p === ui.human ? 'You' : 'Computer · ' + ui.level;
+    if (ui.mode === 'online') return p === ui.human ? 'You' : 'Friend';
     return NAMES[p];
   }
 
@@ -131,7 +132,7 @@
 
   function renderBars() {
     const g = ui.game;
-    const bottom = ui.mode === 'ai' ? ui.human : 'Y';
+    const bottom = ui.mode !== 'local' ? ui.human : 'Y';
     const top = P.other(bottom);
     const fill = (node, p) => {
       node.className = 'pbar' + (g.turn === p && !g.winner ? ' active' : '');
@@ -149,14 +150,14 @@
     const g = ui.game;
     let t = '';
     if (g.winner) t = 'Game over.';
-    else if (!canAct()) t = 'Computer is thinking…';
+    else if (!canAct()) t = ui.mode === 'ai' ? 'Computer is thinking…' : ui.linked ? 'Waiting for your friend…' : 'Your friend is disconnected. They can reopen the invite link.';
     else if (ui.ghost && !P.isLegal(g, ui.ghost.a, ui.ghost.b, ui.ghost.r)) t = g.moves < 2 ? 'Good, now align it with the red stone.' : 'Not there. Two corners must touch the pattern.';
     else if (g.moves < 2) t = 'Tap to move, tap the stone to rotate, then <b>end turn →</b>';
     else t = 'Move or rotate again or <b>end turn →</b>';
     $('hint').innerHTML = t;
   }
 
-  const canAct = () => !ui.busy && (ui.mode === 'local' || ui.game.turn === ui.human);
+  const canAct = () => !ui.busy && (ui.mode === 'local' || ui.game.turn === ui.human) && (ui.mode !== 'online' || ui.linked);
 
   function toast(msg) {
     const t = $('toast');
@@ -181,7 +182,7 @@
   function announce(prev) {
     const g = ui.game, l = g.last;
     if (!l) return;
-    const who = (p) => (ui.mode === 'ai' ? (p === ui.human ? 'You' : 'Computer') : NAMES[p]);
+    const who = (p) => (ui.mode === 'local' ? NAMES[p] : p === ui.human ? 'You' : ui.mode === 'ai' ? 'Computer' : 'Friend');
     const parts = [];
     if (l.scored) parts.push(`${who(l.player)} scored ${l.scored} point${l.scored > 1 ? 's' : ''}`);
     for (const p of ['Y', 'B']) if (l.capturedBy[p]) parts.push(`${who(p)} took ${l.capturedBy[p]} stone${l.capturedBy[p] > 1 ? 's' : ''} and now ${who(p) === 'You' ? 'have' : 'has'} ${g.supply[p]} to place`);
@@ -189,10 +190,11 @@
     if (parts.length) toast(parts.join(' · '));
   }
 
-  function commit(a, b, r) {
+  function commit(a, b, r, remote) {
     const prev = ui.game;
     ui.game = P.play(prev, a, b, r);
     ui.log.push([a, b, r]);
+    if (ui.mode === 'online' && !remote) netSend({ t: 'move', n: ui.log.length - 1, a, b, r });
     announce(prev);
     if (ui.game.winner) { ui.ghost = null; render(); setTimeout(showOver, 700); return; }
     if (canAct()) suggestGhost();
@@ -217,13 +219,13 @@
     let title, sub, note = '';
     const surround = 'by surrounding the red stone';
     if (g.winner === 'draw') { title = 'Draw'; sub = 'Equal points.'; }
-    else if (ui.mode === 'ai') {
+    else if (ui.mode !== 'local') {
       const won = g.winner === ui.human;
       title = won ? 'You won!' : 'You lost';
       sub = g.reason === 'surround' ? surround : g.reason === 'points' ? 'on points' : 'by resignation';
       sub = 'by ' + sub.replace(/^by /, '').replace(/^on /, '');
-      if (won) note = 'To earn a real set you need to beat someone who owns one. Online play against owners is coming next.';
-      if (!ui.saved) record(won);
+      if (won && ui.mode === 'ai') note = 'To earn a real set you need to beat someone who owns one. Online play against owners is coming next.';
+      if (!ui.saved && ui.mode === 'ai') record(won);
     } else {
       title = NAMES[g.winner] + ' wins';
       sub = g.reason === 'surround' ? surround : g.reason === 'points' ? 'on points' : 'by resignation';
@@ -252,7 +254,7 @@
     const finished = !!g.winner && g.reason !== 'resign';
     const rec = {
       v: 1, date: new Date().toISOString(), mode: ui.mode,
-      level: ui.mode === 'ai' ? ui.level : null, human: ui.mode === 'ai' ? ui.human : null,
+      level: ui.mode === 'ai' ? ui.level : null, human: ui.mode !== 'local' ? ui.human : null,
       moves: ui.log.slice(), winner: g.winner, reason: g.reason || 'abandoned',
       points: [g.points.Y, g.points.B], pattern: finished ? P.patternId(g) : null,
     };
@@ -279,8 +281,9 @@
     if (p.name) line = `Pattern “${p.name}” · ${rec.pattern} · ${seen}.`;
     else if (g.winner === 'draw') line = `Pattern ${rec.pattern}, ${seen}. A draw, so nobody names it.`;
     else if (ui.mode === 'ai' && g.winner !== ui.human) line = `Pattern ${rec.pattern}, ${seen}. The computer won it, so it stays unnamed.`;
+    else if (ui.mode === 'online' && g.winner !== ui.human) line = `Pattern ${rec.pattern}, ${seen}. Your friend won it and may name it.`;
     else {
-      line = `${p.count > 1 ? 'Unnamed pattern' : 'New pattern'} ${rec.pattern}, ${seen}. ${ui.mode === 'ai' ? 'You' : NAMES[g.winner]} may name it.`;
+      line = `${p.count > 1 ? 'Unnamed pattern' : 'New pattern'} ${rec.pattern}, ${seen}. ${ui.mode !== 'local' ? 'You' : NAMES[g.winner]} may name it.`;
       form.hidden = false;
       $('claim-name').value = '';
     }
@@ -294,7 +297,7 @@
     const ps = store.get('plex-patterns', {}), p = ps[ui.rec.pattern];
     if (!p || p.name) return;
     p.name = name;
-    p.by = ui.mode === 'ai' ? 'You' : NAMES[ui.game.winner];
+    p.by = ui.mode !== 'local' ? 'You' : NAMES[ui.game.winner];
     p.claimed = new Date().toISOString();
     store.set('plex-patterns', ps);
     ui.rec.name = name;
@@ -350,13 +353,13 @@
     const list = $('archive');
     list.textContent = '';
     let w = 0, l = 0;
-    for (const g of games) if (g.mode === 'ai' && g.winner && g.winner !== 'draw') { if (g.winner === g.human) w++; else l++; }
+    for (const g of games) if (g.mode !== 'local' && g.winner && g.winner !== 'draw') { if (g.winner === g.human) w++; else l++; }
     for (const g of games.slice(-10).reverse()) {
       const li = document.createElement('li');
-      const ai = g.mode === 'ai';
-      const av = document.createElement('span'); av.className = 'avatar'; av.textContent = ai ? 'C' : '2';
+      const ai = g.mode !== 'local';
+      const av = document.createElement('span'); av.className = 'avatar'; av.textContent = g.mode === 'ai' ? 'C' : g.mode === 'online' ? 'F' : '2';
       const who = document.createElement('span'); who.className = 'who';
-      const b = document.createElement('b'); b.textContent = ai ? 'Computer · ' + g.level : 'Two players';
+      const b = document.createElement('b'); b.textContent = g.mode === 'ai' ? 'Computer · ' + g.level : g.mode === 'online' ? 'Friend · online' : 'Two players';
       const sm = document.createElement('small');
       const name = g.pattern && ps[g.pattern] && ps[g.pattern].name;
       sm.textContent = `${g.date.slice(0, 10)} · ${REASON[g.reason] || g.reason} · ${g.points[0]}–${g.points[1]}` + (name ? ` · “${name}”` : '');
@@ -384,6 +387,7 @@
   }
   function goHome() {
     ui.game = null;
+    netClose();
     $('game').hidden = true; $('home').hidden = false;
     showRecord();
     showPatterns();
@@ -444,7 +448,8 @@
     $('ai-sub').textContent = 'Level ' + ui.level;
     for (const x of $('levels').children) x.setAttribute('aria-checked', String(x === b));
   });
-  $('start-ai').addEventListener('click', () => start('ai'));
+  $('start-ai').addEventListener('click', () => { ui.human = 'Y'; start('ai'); });
+  $('start-online').addEventListener('click', hostGame);
   $('start-local').addEventListener('click', () => start('local'));
   $('menu-btn').addEventListener('click', () => {
     $('menu').querySelector('[data-act="grid"]').textContent = ui.grid ? 'Hide background grid' : 'Show background grid';
@@ -462,14 +467,130 @@
       // leaving a running game: it goes into the log as resigned
       if (!ui.game.winner && ui.log.length > 1) {
         if (ui.mode === 'ai') record(false);
-        ui.game = P.resign(ui.game, ui.mode === 'ai' ? ui.human : ui.game.turn);
+        if (ui.mode === 'online') netSend({ t: 'resign' });
+        ui.game = P.resign(ui.game, ui.mode !== 'local' ? ui.human : ui.game.turn);
         saveGame();
+      }
+      if (a === 'rematch' && ui.mode === 'online') {
+        if (!ui.linked) { goHome(); return; }
+        netSend({ t: 'rematch' });
+        ui.human = P.other(ui.human);   // colours swap every game
       }
       if (a === 'rematch') start(ui.mode); else goHome();
     }
   };
   $('menu').addEventListener('click', act);
   $('over').addEventListener('click', act);
+
+  // ---- online: two devices, connected peer to peer through an invite link ----
+  // The host is yellow in the first game; colours swap on every rematch.
+  const net = { peer: null, conn: null, host: false, started: false };
+  function netClose() {
+    try { if (net.conn) net.conn.close(); } catch (e) { /* already gone */ }
+    try { if (net.peer) net.peer.destroy(); } catch (e) { /* already gone */ }
+    net.peer = net.conn = null; net.started = false; ui.linked = false;
+  }
+  function netSend(msg) { if (net.conn && net.conn.open) net.conn.send(msg); }
+  const inviteStatus = (t) => { $('invite-status').textContent = t; };
+  function netError(err) {
+    const t = err && err.type;
+    inviteStatus(t === 'peer-unavailable' ? 'This invite is no longer open. Ask your friend for a new link.'
+      : 'Could not connect. Check your internet connection and try again.');
+  }
+  function openInvite(asHost) {
+    $('invite-box').hidden = !asHost;
+    if (!window.Peer) { inviteStatus('Online play could not be loaded.'); $('invite').showModal(); return false; }
+    $('invite').showModal();
+    return true;
+  }
+  function hostGame() {
+    netClose();
+    const code = Array.from(crypto.getRandomValues(new Uint8Array(8)), (x) => 'abcdefghjkmnpqrstuvwxyz23456789'[x % 31]).join('');
+    net.host = true;
+    $('invite-link').value = location.origin + location.pathname + '?join=' + code;
+    inviteStatus('Opening the game…');
+    if (!openInvite(true)) return;
+    net.peer = new window.Peer('plex-' + code);
+    net.peer.on('open', () => inviteStatus('Waiting for your friend…'));
+    net.peer.on('connection', (c) => { if (net.conn && net.conn.open) c.close(); else wire(c); });
+    net.peer.on('error', netError);
+  }
+  function joinGame(code) {
+    netClose();
+    net.host = false;
+    inviteStatus('Joining the game…');
+    if (!openInvite(false)) return;
+    net.peer = new window.Peer();
+    net.peer.on('open', () => wire(net.peer.connect('plex-' + code, { reliable: true })));
+    net.peer.on('error', netError);
+  }
+  function wire(c) {
+    net.conn = c;
+    c.on('open', () => {
+      ui.linked = true;
+      if (!net.host) return;               // the guest waits for the host's state
+      if (net.started && ui.mode === 'online' && ui.game) {
+        c.send({ t: 'state', human: P.other(ui.human), moves: ui.log });   // friend came back
+        toast('Your friend is back');
+        if (canAct() && !ui.ghost) suggestGhost();
+        render();
+      } else {
+        $('invite').close();
+        net.started = true;
+        ui.human = 'Y';
+        start('online');
+        c.send({ t: 'state', human: 'B', moves: [] });
+      }
+    });
+    c.on('data', onNet);
+    c.on('close', () => {
+      if (net.conn !== c) return;
+      ui.linked = false;
+      if (ui.mode === 'online' && ui.game) { if (!ui.game.winner) toast('Your friend disconnected'); render(); }
+    });
+  }
+  const isInt = Number.isInteger;
+  function onNet(m) {
+    if (!m || typeof m !== 'object') return;
+    if (m.t === 'state' && !net.host && Array.isArray(m.moves)) {
+      $('invite').close(); $('over').close(); $('menu').close();
+      net.started = true;
+      ui.human = m.human === 'Y' ? 'Y' : 'B';
+      ui.linked = true;
+      start('online');
+      try {
+        for (const mv of m.moves) { ui.game = P.play(ui.game, mv[0], mv[1], mv[2]); ui.log.push([mv[0], mv[1], mv[2]]); }
+      } catch (e) { /* host sent something unplayable: stay with what replayed */ }
+      ui.ghost = null;
+      if (!ui.game.winner && canAct()) suggestGhost();
+      render();
+    } else if (m.t === 'move') {
+      if (ui.mode !== 'online' || !ui.game || ui.game.winner || ui.game.turn === ui.human) return;
+      if (m.n !== ui.log.length || !isInt(m.a) || !isInt(m.b) || !isInt(m.r) || !P.isLegal(ui.game, m.a, m.b, m.r)) return;
+      commit(m.a, m.b, m.r, true);
+    } else if (m.t === 'resign') {
+      if (ui.mode !== 'online' || !ui.game || ui.game.winner) return;
+      ui.game = P.resign(ui.game, P.other(ui.human));
+      ui.ghost = null;
+      render();
+      showOver();
+    } else if (m.t === 'rematch') {
+      if (ui.mode !== 'online' || !ui.game) return;
+      $('over').close(); $('menu').close();
+      if (!ui.game.winner && ui.log.length > 1) { ui.game = P.resign(ui.game, P.other(ui.human)); saveGame(); }
+      ui.human = P.other(ui.human);
+      start('online');
+    }
+  }
+  $('invite-copy').addEventListener('click', () => copyText($('invite-link').value, $('invite-copy')));
+  $('invite-share').hidden = !navigator.share;
+  $('invite-share').addEventListener('click', () => {
+    navigator.share({ title: 'Plex', text: 'Play Plex with me', url: $('invite-link').value }).catch(() => {});
+  });
+  $('invite-cancel').addEventListener('click', () => { $('invite').close(); netClose(); });
+  $('invite').addEventListener('cancel', netClose);
+  const joinCode = new URLSearchParams(location.search).get('join');
+  if (joinCode && /^[a-z0-9]{6,12}$/.test(joinCode)) joinGame(joinCode);
 
   // for watching and replaying a game from outside (teaching sessions, tests)
   window.PlexApp = { get game() { return ui.game; }, get log() { return ui.log; }, get mode() { return ui.mode; }, play: commit };

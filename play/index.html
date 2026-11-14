@@ -28,10 +28,11 @@
       </button>
     </div>
     <div class="mode">
-      <button class="mode-main" id="start-local">
+      <button class="mode-main" id="start-online">
         <svg class="hexicon" viewBox="0 0 50 50" aria-hidden="true"><path d="M25 46C12 37 4 29 4 19A11 11 0 0 1 25 13 11 11 0 0 1 46 19C46 29 38 37 25 46z" fill="#fff"/><rect x="18" y="17" width="10" height="12" rx="2" fill="none" stroke="#5b7fd6" stroke-width="2.2"/><path d="M22 14h8a2 2 0 0 1 2 2v10" fill="none" stroke="#5b7fd6" stroke-width="2.2" stroke-linecap="round"/></svg>
-        <span class="txt"><b>VS Friend</b><small>Pass one device · invite link coming soon</small></span>
+        <span class="txt"><b>VS Friend</b><small>Share invite link</small></span>
       </button>
+      <div class="chips"><button id="start-local">Or pass one device</button></div>
     </div>
     <div class="mode">
       <button class="mode-main" id="start-ai">
@@ -87,6 +88,18 @@
   <button class="btn" data-act="close">Back to game</button>
 </dialog>
 
+<dialog id="invite">
+  <h2>VS FRIEND</h2>
+  <div id="invite-box">
+    <p>Send this link to your friend. The game starts when they open it. You both need to be online.</p>
+    <input id="invite-link" readonly aria-label="Invite link">
+    <button class="btn" id="invite-copy">Copy link</button>
+    <button class="btn outline" id="invite-share">Share…</button>
+  </div>
+  <p id="invite-status" role="status"></p>
+  <button class="link" id="invite-cancel">Cancel</button>
+</dialog>
+
 <dialog id="over">
   <div class="star">
     <h2 id="over-title"></h2>
@@ -109,6 +122,7 @@
   </div>
 </dialog>
 
+<script src="vendor/peerjs.min.js"></script>
 <script src="engine.js"></script>
 <script src="ai.js"></script>
 <script src="app.js"></script>
